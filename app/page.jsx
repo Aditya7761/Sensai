@@ -115,6 +115,7 @@ export default function Home() {
                             height={40}
                             src={testimonial.image}
                             alt={testimonial.author}
+                            unoptimized
                             className="rounded-full object-cover border-2 border-primary/20"
                           />
                         </div>
