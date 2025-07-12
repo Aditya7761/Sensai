@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { redirect } from "next/navigation"; 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -44,35 +45,37 @@ export async function getIndustryInsights() {
     where: {
       clerkUserId: userId,
     },
-    include:{
+    include: {
       industryInsight: true,
     },
   });
- 
+
   if (!user) throw new Error("User not found");
 
+  if (!user.industry) {
+    redirect("/onboarding");
+  }
+
   if (!user.industryInsight) {
-  if (!user.industry) throw new Error("User industry not set");
+    const insights = await generateAIInsights(user.industry);
 
-  const insights = await generateAIInsights(user.industry);
+    const industryInsight = await db.industryInsight.create({
+      data: {
+        industry: user.industry,
+        salaryRanges: insights.salaryRanges,
+        growthRate: insights.growthRate,
+        demandLevel: insights.demandLevel,
+        topSkills: insights.topSkills,
+        marketOutlook: insights.marketOutlook,
+        keyTrends: insights.keyTrends,
+        recommendedSkills: insights.recommendedSkills,
+        nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
 
-  const industryInsight = await db.industryInsight.create({
-    data: {
-      industry: user.industry,
-      salaryRanges: insights.salaryRanges,
-      growthRate: insights.growthRate,
-      demandLevel: insights.demandLevel,
-      topSkills: insights.topSkills,
-      marketOutlook: insights.marketOutlook,
-      keyTrends: insights.keyTrends,
-      recommendedSkills: insights.recommendedSkills,
-      nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
-
-  return industryInsight;
-}
-
+    return industryInsight;
+  }
 
   return user.industryInsight;
 }
+
