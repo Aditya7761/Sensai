@@ -17,7 +17,7 @@ A full-stack, AI-powered career coaching platform built using **Next.js**, **Rea
 - Clean Markdown editor with PDF export
 - Pre-filled career data for quick customization
 
-### 🤖 Mock Interview Generator
+### 🤖 Interview Preparation
 - AI-generated questions based on user’s industry
 - Real-time evaluation and performance feedback
 
